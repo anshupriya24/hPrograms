@@ -1,0 +1,132 @@
+import java.text.DecimalFormat;
+import java.util.*;
+
+public class Payment {
+
+    public static void main(String args[]) {
+        String input = "GBP:100,EUR:200,CZK:1000|743:EUR:5.76,932:GBP:32.10,909:CZK:223.26,23:CZK:890.22,902:GBP:58.23,89:EUR:104.25,663:EUR:97.43,902:EUR:20.01";
+        System.out.println(getPaymentProcessing(input));
+    }
+
+    private static String getPaymentProcessing(String input) {
+        String[] strArray = input.split("\\|");
+        String[] fundsAvailable = strArray[0].split(",");
+        String[] strArrayCommaSep = strArray[1].split(",");
+        //Arrays.sort(strArrayCommaSep);
+        DecimalFormat decimalFormatPayment = new DecimalFormat("###.##");
+        double paymentAfterDeduction = 0;
+        String resultg = "\nGBP\n";
+        String resultc = "\nCZK\n";
+        String resulte = "\nEUR\n";
+        double fAmtG = 0;
+        double fAmtE = 0;
+        double fAmtC = 0;
+        for (String funds : fundsAvailable) {
+            if (funds.contains("GBP")) {
+                fAmtG = Integer.parseInt(funds.split(":")[1]);
+            }
+            if (funds.contains("EUR")) {
+                fAmtE = Integer.parseInt(funds.split(":")[1]);
+            }
+            if (funds.contains("CZK")) {
+                fAmtC = Integer.parseInt(funds.split(":")[1]);
+            }
+        }
+        String arr[] = new String[strArrayCommaSep.length];
+        int i=0;
+        Map<String, Double> mapG = new HashMap<>();
+        Map<String, Double> mapE = new HashMap<>();
+        Map<String, Double> mapC = new HashMap<>();
+        String result = "";
+
+        for (String str : strArrayCommaSep) {
+            if (str.contains("GBP")) {
+                mapG.put(str.split(":")[0], Double.parseDouble(str.split(":")[2]));
+
+            }
+            if (str.contains("EUR")) {
+                //Map<String, Double> map = new HashMap<>();
+                mapE.put(str.split(":")[0], Double.parseDouble(str.split(":")[2]));
+
+            }
+            if (str.contains("CZK")) {
+                mapC.put(str.split(":")[0], Double.parseDouble(str.split(":")[2]));
+            }
+        }
+        List<Map.Entry<String, Double>> list = new ArrayList<>(mapG.entrySet());
+        Collections.sort(list, Map.Entry.comparingByValue());
+        for (Map.Entry<String, Double> entry : list) {
+            result = entry.getKey() + ":GBP:" + entry.getValue();
+            arr[i]=result;
+            i++;
+        }
+        List<Map.Entry<String, Double>> listE = new ArrayList<>(mapE.entrySet());
+        Collections.sort(listE, Map.Entry.comparingByValue());
+        for (Map.Entry<String, Double> entry : listE) {
+            result = entry.getKey() + ":EUR:" + entry.getValue();
+            arr[i]=result;
+            i++;
+        }
+        List<Map.Entry<String, Double>> listC = new ArrayList<>(mapC.entrySet());
+        Collections.sort(listC, Map.Entry.comparingByValue());
+        for (Map.Entry<String, Double> entry : listC) {
+            result = entry.getKey() + ":CZK:" + entry.getValue();
+            arr[i]=result;
+            i++;
+        }
+        for (String str : arr) {
+            if (str.contains("GBP")) {
+
+                String payment = str.split(":")[2];
+                double paymentD = Double.parseDouble(payment);
+                paymentAfterDeduction = (paymentD - paymentD / 300);
+                double p10 = Math.pow(10, 2);
+                double roundv = Math.ceil(paymentAfterDeduction * p10) / p10;
+                fAmtG = fAmtG - roundv;
+                //BigDecimal bg= new BigDecimal(Float.valueOf(paymentAfterDeduction));
+                //BigDecimal paymentUp=bg.setScale(2,BigDecimal.ROUND_HALF_UP);
+                //decimalFormatPayment.format(paymentAfterDeduction);
+                if (fAmtG > 0) {
+                    resultg = resultg + str.split(":")[0] + ":" + "GBP:" + roundv + "\n";
+                    ;
+                }
+
+
+            }
+            if (str.contains("EUR")) {
+
+                String payment = str.split(":")[2];
+                double paymentD = Double.parseDouble(payment);
+                paymentAfterDeduction = paymentD - (paymentD / 200);
+                double p10 = Math.pow(10, 2);
+                double roundv = Math.ceil(paymentAfterDeduction * p10) / p10;
+                fAmtE = fAmtE - roundv;
+                if (fAmtE > 0) {
+                    resulte = resulte + str.split(":")[0] + ":" + "EUR:" + roundv + "\n";
+                    ;
+                }
+            }
+            if (str.contains("CZK")) {
+
+                String payment = str.split(":")[2];
+                double paymentD = Double.parseDouble(payment);
+                paymentAfterDeduction = paymentD - (paymentD / 200);
+                double p10 = Math.pow(10, 2);
+                double roundv = Math.ceil(paymentAfterDeduction * p10) / p10;
+                fAmtC = fAmtC - roundv;
+                if (fAmtC > 0) {
+                    resultc = resultc + str.split(":")[0] + ":" + "CZK:" + roundv + "\n";
+                    ;
+                }
+            }
+
+        }
+
+
+        //System.out.println(strArrayCommaSep[0]);
+        //System.out.println(strArray[1]);
+        return resultc + resulte + resultg;
+
+
+    }
+}
